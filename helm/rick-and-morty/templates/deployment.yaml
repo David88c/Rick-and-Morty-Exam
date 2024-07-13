@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "rick-and-morty.fullname" . }}-deploy
+  labels:
+    app: {{ include "rick-and-morty.name" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "rick-and-morty.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "rick-and-morty.name" . }}
+    spec:
+      containers:
+        - name: {{ include "rick-and-morty.name" . }}-app
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          ports:
+            - containerPort: 5000
+          env:
+            - name: FLASK_ENV
+              value: production
