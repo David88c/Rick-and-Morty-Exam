@@ -12,6 +12,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl wget conntrack
+
       - name: Set up Minikube
         uses: manusa/actions-setup-minikube@v2.4.0
         with:
