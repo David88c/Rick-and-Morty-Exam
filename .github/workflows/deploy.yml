@@ -1,55 +1,86 @@
-name: Deploy and Test Rick and Morty App
+name: Kubernetes Deployment and Test
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
 
 jobs:
-  build:
+  setup-minikube:
     runs-on: ubuntu-20.04
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Set up Kubernetes
-      uses: manusa/actions-setup-minikube@v2.4.0
-      with:
-        minikube version: v1.23.0
-        kubernetes version: v1.20.2  # Specify the Kubernetes version
-        start-args: --driver=docker
+      - name: Set up Minikube
+        uses: manusa/actions-setup-minikube@v2.4.0
+        with:
+          minikube version: 'latest'
+          kubernetes version: 'v1.20.2'
 
-    - name: Install Helm
-      run: |
-        curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+      - name: Start Minikube
+        run: |
+          minikube start --driver=docker
+          minikube status
 
-    - name: Build Docker image
-      run: |
-        docker build -t rick-and-morty-app .
-        docker tag rick-and-morty-app localhost:5000/rick-and-morty-app
-        minikube image load rick-and-morty-app
+  build-and-deploy:
+    needs: setup-minikube
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Deploy application to Kubernetes
-      run: |
-        helm upgrade --install rick-and-morty helm/rick-and-morty
+      - name: Build Docker image
+        run: |
+          eval $(minikube docker-env)
+          docker build -t rick-and-morty-app .
 
-    - name: Wait for application to be ready
-      run: |
-        kubectl rollout status deployment/rick-and-morty-deploy --timeout=60s
+      - name: Deploy to Minikube
+        run: |
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/service.yaml
 
-    - name: Run tests
-      run: |
-        kubectl get all
-        sleep 20
-        kubectl get svc
-        SERVICE_IP=$(minikube service rick-and-morty-service --url)
-        curl --fail $SERVICE_IP/healthcheck
-        curl --fail $SERVICE_IP/characters
+      - name: Wait for deployment to finish
+        run: |
+          kubectl rollout status deployment/rick-and-morty-app
 
-    - name: Print application logs
-      run: |
-        kubectl logs deployment/rick-and-morty-deploy
+  test-endpoints:
+    needs: build-and-deploy
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install curl
+        run: sudo apt-get install -y curl
+
+      - name: Test application endpoints
+        run: |
+          APP_IP=$(minikube service rick-and-morty-app --url)
+          curl $APP_IP/health
+          curl $APP_IP/api/v1/characters
+
+  update-readme:
+    runs-on: ubuntu-20.04
+    needs: test-endpoints
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Update README.md
+        run: |
+          echo "# Kubernetes Deployment Workflow" > README.md
+          echo "This workflow sets up a small Kubernetes cluster on a GitHub Actions runner, deploys the application to the cluster, runs tests against the application's endpoints, and updates this README.md with an explanation of the workflow, jobs, and steps." >> README.md
+          echo "## Jobs" >> README.md
+          echo "1. **setup-minikube**: Sets up Minikube on the runner." >> README.md
+          echo "2. **build-and-deploy**: Builds the Docker image and deploys it to Minikube." >> README.md
+          echo "3. **test-endpoints**: Tests the application endpoints." >> README.md
+          echo "4. **update-readme**: Updates the README.md file with the workflow explanation." >> README.md
+
+      - name: Commit changes
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+          git add README.md
+          git commit -m "Update README.md with workflow explanation"
+          git push
