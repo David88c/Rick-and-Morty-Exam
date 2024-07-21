@@ -1,0 +1,50 @@
+name: Deploy and Test Rick and Morty App
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Kubernetes
+      uses: manusa/actions-setup-minikube@v2.4.0
+      with:
+        minikube version: v1.23.0
+        start-args: --driver=docker
+
+    - name: Build Docker image
+      run: |
+        docker build -t rick-and-morty-app .
+        docker tag rick-and-morty-app localhost:5000/rick-and-morty-app
+        minikube image load rick-and-morty-app
+
+    - name: Deploy application to Kubernetes
+      run: |
+        helm upgrade --install rick-and-morty helm/rick-and-morty
+
+    - name: Wait for application to be ready
+      run: |
+        kubectl rollout status deployment/rick-and-morty-deploy --timeout=60s
+
+    - name: Run tests
+      run: |
+        kubectl get all
+        sleep 20
+        kubectl get svc
+        SERVICE_IP=$(minikube service rick-and-morty-service --url)
+        curl --fail $SERVICE_IP/healthcheck
+        curl --fail $SERVICE_IP/characters
+
+    - name: Print application logs
+      run: |
+        kubectl logs deployment/rick-and-morty-deploy
