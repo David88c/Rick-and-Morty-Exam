@@ -20,13 +20,12 @@ jobs:
       - name: Set up Minikube
         uses: manusa/actions-setup-minikube@v2.4.0
         with:
-          minikube version: 'latest'
+          minikube version: 'v1.24.0'  # Latest stable version as of now
           kubernetes version: 'v1.20.2'
 
       - name: Start Minikube
         run: |
-          minikube start --driver=docker
-          minikube status
+          minikube start --driver=docker || minikube logs
 
   build-and-deploy:
     needs: setup-minikube
@@ -61,7 +60,7 @@ jobs:
 
       - name: Test application endpoints
         run: |
-          APP_IP=$(minikube service rick-and-morty-app --url)
+          APP_IP=$(minikube service rick-and-morty-app --url | grep http)
           curl $APP_IP/health
           curl $APP_IP/api/v1/characters
 
