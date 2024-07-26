@@ -34,7 +34,8 @@ jobs:
       - name: Build and push Docker image
         run: |
           docker buildx create --use
-          
+          docker buildx build --cache-from=type=local,src=/tmp/.buildx-cache --cache-to=type=local,dest=/tmp/.buildx-cache-new --push -t david817/rick-and-morty:${{ github.sha }} .
+          docker buildx build --cache-from=type=local,src=/tmp/.buildx-cache --cache-to=type=local,dest=/tmp/.buildx-cache-new --push -t david817/rick-and-morty:latest .
 
       - name: Save new cache
         if: always()
@@ -42,6 +43,11 @@ jobs:
         with:
           path: /tmp/.buildx-cache-new
           key: ${{ runner.os }}-buildx-${{ github.sha }}
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y conntrack
 
       - name: Set up Minikube
         run: |
@@ -63,6 +69,7 @@ jobs:
 
       - name: Deploy to Minikube
         run: |
+          sed -i 's|image: .*$|image: david817/rick-and-morty:latest|g' k8s/deployment.yaml
           kubectl apply -f k8s/deployment.yaml
           kubectl apply -f k8s/service.yaml
           kubectl apply -f k8s/ingress.yaml
