@@ -7,7 +7,7 @@ on:
 
 jobs:
   setup-minikube:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout repository
@@ -23,11 +23,11 @@ jobs:
 
       - name: Start Minikube
         run: |
-          sudo minikube start --driver=none
+          sudo minikube start --driver=none --kubernetes-version=v1.29.0
 
       - name: Set up kubectl
         run: |
-          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          curl -LO "https://dl.k8s.io/release/v1.29.0/bin/linux/amd64/kubectl"
           chmod +x kubectl
           sudo mv kubectl /usr/local/bin/
 
