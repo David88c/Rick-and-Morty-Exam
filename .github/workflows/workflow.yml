@@ -1,28 +1,42 @@
-name: CI
+name: Minikube Deployment
+
 on:
-  - pull_request
+  push:
+    branches:
+      - main
+
 jobs:
-  job1:
+  setup-minikube:
     runs-on: ubuntu-latest
-    name: build example and deploy to minikube
+
     steps:
-    - uses: actions/checkout@v4
-      with:
-        repository: medyagh/local-dev-example-with-minikube
-    - name: Start minikube
-      uses: medyagh/setup-minikube@latest
-    - name: Try the cluster!
-      run: kubectl get pods -A
-    - name: Build image
-      run: |
-        minikube image build -t local/devex:v1 .        
-    - name: Deploy to minikube
-      run:
-        kubectl apply -f deploy/k8s.yaml
-        kubectl wait --for=condition=ready pod -l app=local-devex
-    - name: Test service URLs
-      run: |
-        minikube service list
-        minikube service local-devex-svc --url
-        echo "------------------opening the service------------------"
-        curl $(minikube service local-devex-svc --url)        
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v1
+
+      - name: Install Minikube
+        run: |
+          curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+          sudo install minikube-linux-amd64 /usr/local/bin/minikube
+
+      - name: Start Minikube
+        run: |
+          sudo minikube start --driver=none
+
+      - name: Set up kubectl
+        run: |
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
+
+      - name: Deploy Application
+        run: |
+          kubectl apply -f path/to/your/deployment.yaml
+          kubectl apply -f path/to/your/service.yaml
+
+      - name: Verify Deployment
+        run: |
+          kubectl get pods
+          kubectl get svc
