@@ -15,10 +15,10 @@ spec:
         app: rick-and-morty
     spec:
       containers:
-        - name: rick-and-morty-app
-          image: david817/rick-and-morty:1.0
-          ports:
-            - containerPort: 5000
-          env:
-            - name: FLASK_ENV
-              value: production
+      - name: rick-and-morty-app
+        image: david817/rick-and-morty:1.0
+        ports:
+        - containerPort: 5000
+        env:
+        - name: FLASK_ENV
+          value: production

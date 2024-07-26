@@ -34,8 +34,7 @@ jobs:
       - name: Build and push Docker image
         run: |
           docker buildx create --use
-          docker buildx build --cache-from=type=local,src=/tmp/.buildx-cache --cache-to=type=local,dest=/tmp/.buildx-cache-new --push -t david817/rick-and-morty:${{ github.sha }} .
-          docker tag david817/rick-and-morty:${{ github.sha }} david817/rick-and-morty:2.0
+          
 
       - name: Save new cache
         if: always()
