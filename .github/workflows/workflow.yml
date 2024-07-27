@@ -1,47 +1,35 @@
-name: Minikube Deployment
+name: Deploy to Kubernetes
 
-on:
-  push:
-    branches:
-      - main
+on: [push]
 
 jobs:
-  setup-minikube:
-    runs-on: ubuntu-22.04
+  deploy:
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Set up Docker
-        uses: docker/setup-buildx-action@v1
+    - name: Set up Kubernetes
+      uses: manusa/actions-setup-minikube@v2.4.0
+      with:
+        minikube version: 'latest'
+        start-args: '--driver=docker'
 
-      - name: Install conntrack
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y conntrack
+    - name: Build Docker image
+      run: |
+        docker build -t rick-and-morty-api .
+        docker tag rick-and-morty-api:latest ${{ secrets.DOCKER_HUB_USERNAME }}/rick-and-morty-api:latest
+        echo ${{ secrets.DOCKER_HUB_PASSWORD }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
+        docker push ${{ secrets.DOCKER_HUB_USERNAME }}/rick-and-morty-api:latest
 
-      - name: Install Minikube
-        run: |
-          curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-          sudo install minikube-linux-amd64 /usr/local/bin/minikube
+    - name: Apply Kubernetes manifests
+      run: |
+        kubectl apply -f yamls/deployment.yaml
+        kubectl apply -f yamls/service.yaml
+        kubectl apply -f yamls/ingress.yaml
 
-      - name: Start Minikube
-        run: |
-          sudo minikube start --driver=none
-
-      - name: Set up kubectl
-        run: |
-          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-          chmod +x kubectl
-          sudo mv kubectl /usr/local/bin/
-
-      - name: Deploy Application
-        run: |
-          kubectl apply -f yamls/deployment.yaml
-          kubectl apply -f yamls/service.yaml
-
-      - name: Verify Deployment
-        run: |
-          kubectl get pods
-          kubectl get svc
+    - name: Run tests
+      run: |
+        curl -f http://rick-and-morty.local/healthcheck
+        curl -f http://rick-and-morty.local/characters
