@@ -22,11 +22,6 @@ jobs:
         sudo mv minikube /usr/local/bin/
         minikube start --driver=docker --kubernetes-version=v1.29.7
 
-    - name: Build Docker image
-      run: |
-        DOCKER_TAG=david817/rick-and-morty:1.0
-        echo "Building Docker image with tag: $DOCKER_TAG"
-        docker build -t $DOCKER_TAG .
 
     - name: Login to Docker Hub
       env:
