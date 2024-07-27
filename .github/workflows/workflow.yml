@@ -22,9 +22,11 @@ jobs:
         sudo mv minikube /usr/local/bin/
         minikube start --driver=docker --kubernetes-version=v1.29.7
 
+    - name: Debug Docker Hub Username
+      run: echo "Docker Hub Username: ${{ secrets.DOCKER_HUB_USERNAME }}"
+
     - name: Build Docker image
       run: |
-        echo "Docker Hub Username: ${{ secrets.DOCKER_HUB_USERNAME }}"
         docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/rick-and-morty-api:latest .
         echo ${{ secrets.DOCKER_HUB_PASSWORD }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
         docker push ${{ secrets.DOCKER_HUB_USERNAME }}/rick-and-morty-api:latest
