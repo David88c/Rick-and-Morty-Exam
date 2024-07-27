@@ -22,19 +22,6 @@ jobs:
         sudo mv minikube /usr/local/bin/
         minikube start --driver=docker --kubernetes-version=v1.29.7
 
-    - name: Form Docker Tag
-      id: docker_tag
-      run: |
-        echo "DOCKER_TAG=${{ secrets.DOCKER_HUB_USERNAME }}/rick-and-morty:1.0" >> $GITHUB_ENV
-        echo "Formed Docker Tag: ${{ secrets.DOCKER_HUB_USERNAME }}/rick-and-morty:1.0"
-
-    - name: Build Docker image
-      run: |
-        echo "Building Docker image with tag: ${{ env.DOCKER_TAG }}"
-        docker build -t ${{ env.DOCKER_TAG }} .
-        echo ${{ secrets.DOCKER_HUB_PASSWORD }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
-        docker push ${{ env.DOCKER_TAG }}
-
     - name: Apply Kubernetes manifests
       run: |
         minikube kubectl -- apply -f yamls/deployment.yaml
