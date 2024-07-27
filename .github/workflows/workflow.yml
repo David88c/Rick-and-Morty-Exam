@@ -24,7 +24,7 @@ jobs:
 
     - name: Build Docker image
       run: |
-        DOCKER_TAG=david817/rick-and-morty:1.0
+        DOCKER_TAG=david817/rick-and-morty:2.0
         echo "Building Docker image with tag: $DOCKER_TAG"
         docker build -t $DOCKER_TAG .
         echo ${{ secrets.DOCKER_HUB_PASSWORD }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
