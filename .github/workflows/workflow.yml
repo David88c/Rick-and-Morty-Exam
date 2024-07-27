@@ -16,37 +16,6 @@ jobs:
       - name: Set up Docker
         uses: docker/setup-buildx-action@v1
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y conntrack
-          VERSION="v1.24.2"
-          curl -LO https://github.com/kubernetes-sigs/cri-tools/releases/download/$VERSION/crictl-$VERSION-linux-amd64.tar.gz
-          sudo tar zxvf crictl-$VERSION-linux-amd64.tar.gz -C /usr/local/bin
-          rm -f crictl-$VERSION-linux-amd64.tar.gz
-
-      - name: Install Go
-        run: |
-          curl -LO https://golang.org/dl/go1.20.7.linux-amd64.tar.gz
-          sudo tar -C /usr/local -xzf go1.20.7.linux-amd64.tar.gz
-          echo "export PATH=$PATH:/usr/local/go/bin" >> $GITHUB_ENV
-
-      - name: Install cri-dockerd
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y git make
-          git clone https://github.com/Mirantis/cri-dockerd.git
-          cd cri-dockerd
-          mkdir bin
-          /usr/local/go/bin/go get
-          /usr/local/go/bin/go build -o bin/cri-dockerd
-          sudo install -o root -g root -m 0755 bin/cri-dockerd /usr/local/bin/cri-dockerd
-          sudo cp -a packaging/systemd/* /etc/systemd/system
-          sudo sed -i 's:/usr/bin:/usr/local/bin:g' /etc/systemd/system/cri-docker.service
-          sudo systemctl daemon-reload
-          sudo systemctl enable cri-docker.service
-          sudo systemctl enable --now cri-docker.socket
-
       - name: Install Minikube
         run: |
           curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
@@ -54,18 +23,18 @@ jobs:
 
       - name: Start Minikube
         run: |
-          sudo minikube start --driver=none --kubernetes-version=v1.29.0 --container-runtime=docker --cri-socket=unix:///var/run/cri-dockerd.sock
+          sudo minikube start --driver=none
 
       - name: Set up kubectl
         run: |
-          curl -LO "https://dl.k8s.io/release/v1.29.0/bin/linux/amd64/kubectl"
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
           chmod +x kubectl
           sudo mv kubectl /usr/local/bin/
 
       - name: Deploy Application
         run: |
-          kubectl apply -f yamls/deployment.yaml
-          kubectl apply -f yamls/service.yaml
+          kubectl apply -f path/to/your/deployment.yaml
+          kubectl apply -f path/to/your/service.yaml
 
       - name: Verify Deployment
         run: |
