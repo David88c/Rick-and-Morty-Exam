@@ -13,8 +13,8 @@ jobs:
     - name: Set up Kubernetes
       uses: manusa/actions-setup-minikube@v2.4.0
       with:
-        minikube version: 'latest'
-        kubernetes version: 'v1.20.0' # Specify the desired Kubernetes version
+        minikube version: 'v1.33.1'  # Specify a known working Minikube version
+        kubernetes version: 'v1.29'  # Specify a valid Kubernetes version
         start-args: '--driver=docker'
 
     - name: Build Docker image
