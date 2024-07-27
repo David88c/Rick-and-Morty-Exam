@@ -1,35 +1,47 @@
-name: Deploy to Kubernetes
 
-on: [push]
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
 
 jobs:
-  deploy:
-    runs-on: ubuntu-20.04
-
+  build:
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y conntrack socat
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v2
+      with:
+        push: true
+        tags: david817/rick-and-morty:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
 
     - name: Set up Minikube
-      run: |
-        curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-        chmod +x minikube
-        sudo mv minikube /usr/local/bin/
-        minikube start --driver=docker --kubernetes-version=v1.29.7
+      uses: manusa/actions-setup-minikube@v2.4.0
+      with:
+        minikube version: 'latest'
+        kubernetes version: 'v1.21.0'
 
-
-    - name: Apply Kubernetes manifests
+    - name: Deploy to Kubernetes
       run: |
-        minikube kubectl -- apply -f yamls/deployment.yaml
-        minikube kubectl -- apply -f yamls/service.yaml
-        minikube kubectl -- apply -f yamls/ingress.yaml
+        kubectl apply -f yamls/Deployment.yaml
+        kubectl apply -f yamls/Service.yaml
+        kubectl apply -f yamls/Ingress.yaml
 
     - name: Run tests
       run: |
-        curl -f http://rick-and-morty.local/healthcheck
-        curl -f http://rick-and-morty.local/characters
+        curl -f http://rickandmorty.local/healthcheck
+        curl -f http://rickandmorty.local/characters
