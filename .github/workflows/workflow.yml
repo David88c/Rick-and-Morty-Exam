@@ -23,20 +23,6 @@ jobs:
         minikube start --driver=docker --kubernetes-version=v1.29.7
 
 
-    - name: Login to Docker Hub
-      env:
-        DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
-        DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
-      run: |
-        echo "${DOCKER_HUB_PASSWORD}" | docker login -u "${DOCKER_HUB_USERNAME}" --password-stdin
-
-    - name: Push Docker image
-      env:
-        DOCKER_TAG: david817/rick-and-morty:1.0
-      run: |
-        echo "Pushing Docker image with tag: $DOCKER_TAG"
-        docker push $DOCKER_TAG
-
     - name: Apply Kubernetes manifests
       run: |
         minikube kubectl -- apply -f yamls/deployment.yaml
