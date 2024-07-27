@@ -30,9 +30,7 @@ jobs:
     - name: Build Docker image
       run: |
         docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/rick-and-morty:1.0 .
-        echo ${{ secrets.DOCKER_HUB_PASSWORD }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
-        docker push ${{ secrets.DOCKER_HUB_USERNAME }}/rick-and-morty-api:latest
-
+        
     - name: Apply Kubernetes manifests
       run: |
         minikube kubectl -- apply -f yamls/deployment.yaml
