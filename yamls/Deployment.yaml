@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: rick-and-morty-deploy
+  name: rick-and-morty-app
   labels:
     app: rick-and-morty-app
 spec:
