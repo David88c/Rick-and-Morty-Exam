@@ -27,11 +27,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set up Minikube
-      uses: manusa/actions-setup-minikube@v2.4.0
-      with:
-        minikube version: 'latest'
-        kubernetes version: 'v1.21.0'
+
+    - name: start minikube
+      id: minikube
+      uses: medyagh/setup-minikube@latest
+
 
     - name: Configure kubectl
       run: minikube kubectl -- get po -A
