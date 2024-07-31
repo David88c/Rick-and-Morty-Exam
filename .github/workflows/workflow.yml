@@ -27,9 +27,18 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: start minikube
-      id: minikube
-      uses: medyagh/setup-minikube@latest
+    - name: Set up Minikube
+      uses: manusa/actions-setup-minikube@v2.4.0
+      with:
+        minikube version: 'latest'
+        kubernetes version: 'v1.21.0'
+
+    - name: Configure kubectl
+      run: minikube kubectl -- get po -A
+
+    - name: Install Ingress Controller
+      run: minikube addons enable ingress
+    
 
     - name: Deploy to Kubernetes
       run: |
@@ -37,3 +46,21 @@ jobs:
         kubectl apply -f yamls/Service.yaml
         kubectl apply -f yamls/Ingress.yaml
 
+    - name: Wait for deployment to finish
+      run: |
+        kubectl rollout status deployment/rick-and-morty-app
+
+    - name: Check Pods Status
+      run: kubectl get pods
+
+    - name: Check Services Status
+      run: kubectl get services
+
+    - name: Check Ingress Status
+      run: kubectl get ingress
+
+    - name: Run Health Check
+      run: curl -f http://$(minikube ip)/healthcheck
+
+    - name: Test Main API Endpoint
+      run: curl -f http://$(minikube ip)/characters
