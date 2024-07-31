@@ -37,7 +37,10 @@ jobs:
     - name: Install Ingress Controller
       run: |
         minikube addons enable ingress
-        kubectl rollout status deployment/ingress-nginx-controller -n ingress-nginx
+        kubectl wait --namespace ingress-nginx \
+          --for=condition=ready pod \
+          --selector=app.kubernetes.io/component=controller \
+          --timeout=90s
 
     - name: Deploy to Kubernetes
       run: |
@@ -45,21 +48,25 @@ jobs:
         kubectl apply -f yamls/Service.yaml
         kubectl apply -f yamls/Ingress.yaml
 
-    - name: Wait for deployment to finish
-      run: |
-        kubectl rollout status deployment/rick-and-morty-app
+    - name: Wait for Deployment to Finish
+      run: kubectl rollout status deployment/rick-and-morty-app
 
     - name: Check Pods Status
-      run: kubectl get pods
+      run: kubectl get pods -o wide
 
     - name: Check Services Status
-      run: kubectl get services
+      run: kubectl get services -o wide
 
     - name: Check Ingress Status
-      run: kubectl get ingress
+      run: kubectl get ingress -o wide
+
+    - name: Describe Ingress
+      run: kubectl describe ingress rick-and-morty-ingress
 
     - name: Run Health Check
-      run: curl -f http://$(minikube ip)/healthcheck
+      run: |
+        echo "Minikube IP: $(minikube ip)"
+        curl -v http://$(minikube ip)/healthcheck
 
     - name: Test Main API Endpoint
-      run: curl -f http://$(minikube ip)/characters
+      run: curl -v http://$(minikube ip)/characters
