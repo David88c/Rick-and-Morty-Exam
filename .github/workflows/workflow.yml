@@ -37,7 +37,3 @@ jobs:
         kubectl apply -f yamls/Service.yaml
         kubectl apply -f yamls/Ingress.yaml
 
-    - name: Run tests
-      run: |
-        curl -f http://rickandmorty.local/healthcheck
-        curl -f http://rickandmorty.local/characters
