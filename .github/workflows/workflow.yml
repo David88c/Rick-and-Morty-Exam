@@ -27,18 +27,17 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-
     - name: start minikube
       id: minikube
       uses: medyagh/setup-minikube@latest
-
 
     - name: Configure kubectl
       run: minikube kubectl -- get po -A
 
     - name: Install Ingress Controller
-      run: minikube addons enable ingress
-    
+      run: |
+        minikube addons enable ingress
+        kubectl rollout status deployment/ingress-nginx-controller -n ingress-nginx
 
     - name: Deploy to Kubernetes
       run: |
