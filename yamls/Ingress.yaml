@@ -1,10 +1,10 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: rick-and-morty-ingress
+  name: rick-and-morty-ingress # Name of the ingress
 spec:
   rules:
-  - host: ingress.rickandmorty.com
+  - host: ingress.rickandmorty.com # Hostname for the ingress
     http:
       paths:
       - path: /

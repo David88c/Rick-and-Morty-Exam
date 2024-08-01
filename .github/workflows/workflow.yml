@@ -14,59 +14,61 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag david817/rick-and-morty:${{ github.run_number }}
+      run: docker build . --file Dockerfile --tag david817/rick-and-morty:${{ github.run_number }}  # Build the Docker image with a tag using the GitHub run number
     - name: Log in to Docker Hub
-      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login --username "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login --username "${{ secrets.DOCKER_USERNAME }}" --password-stdin  # Log in to Docker Hub using secrets
     - name: Push the Docker image
-      run: docker push david817/rick-and-morty:${{ github.run_number }}
+      run: docker push david817/rick-and-morty:${{ github.run_number }}  # Push the Docker image to Docker Hub
 
   deploy:
-    runs-on: ubuntu-20.04
-    needs: build
+    runs-on: ubuntu-20.04  # Use Ubuntu 20.04 for compatibility with Minikube
+    needs: build  # This job depends on the successful completion of the build job
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: start minikube
-      id: minikube
-      uses: medyagh/setup-minikube@latest
+    - name: Set up Minikube
+      uses: manusa/actions-setup-minikube@v2.4.0 
+      with:
+        minikube version: 'latest'
+        kubernetes version: 'v1.21.0'
 
     - name: Configure kubectl
-      run: minikube kubectl -- get po -A
+      run: minikube kubectl -- get po -A  # Ensure kubectl is configured to use the Minikube context
 
     - name: Install Ingress Controller
       run: |
-        minikube addons enable ingress
+        minikube addons enable ingress  # Enable the Ingress controller addon in Minikube
         kubectl wait --namespace ingress-nginx \
           --for=condition=ready pod \
           --selector=app.kubernetes.io/component=controller \
-          --timeout=90s
+          --timeout=90s  # Wait for the Ingress controller to be ready
 
     - name: Deploy to Kubernetes
       run: |
-        kubectl apply -f yamls/Deployment.yaml
-        kubectl apply -f yamls/Service.yaml
-        kubectl apply -f yamls/Ingress.yaml
+        kubectl apply -f yamls/Deployment.yaml  # Apply the deployment manifest
+        kubectl apply -f yamls/Service.yaml  # Apply the service manifest
+        kubectl apply -f yamls/Ingress.yaml  # Apply the ingress manifest
 
     - name: Wait for Deployment to Finish
-      run: kubectl rollout status deployment/rick-and-morty-app
+      run: kubectl rollout status deployment/rick-and-morty-app  # Wait for the deployment to complete
 
     - name: Check Pods Status
       run: kubectl get pods -o wide
 
     - name: Check Services Status
-      run: kubectl get services -o wide
+      run: kubectl get services -o wide 
 
     - name: Check Ingress Status
-      run: kubectl get ingress -o wide
+      run: kubectl get ingress -o wide 
 
     - name: Describe Ingress
-      run: kubectl describe ingress rick-and-morty-ingress
+      run: kubectl describe ingress rick-and-morty-ingress 
 
     - name: Run Health Check
       run: |
-        echo "Minikube IP: $(minikube ip)"
-        curl -v http://$(minikube ip)/healthcheck
+        echo "Minikube IP: $(minikube ip)"  # Output the Minikube IP address
+        curl -v http://$(minikube ip)/healthcheck  # Verbose curl to check the health check endpoint
 
     - name: Test Main API Endpoint
-      run: curl -v http://$(minikube ip)/characters
+      run: curl -v http://$(minikube ip)/characters  # Verbose curl to test the main API endpoint

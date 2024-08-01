@@ -1,24 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: rick-and-morty-app
-  labels:
-    app: rick-and-morty-app
+  name: rick-and-morty-app  # Name of the deployment
 spec:
-  replicas: 4
+  replicas: 3
   selector:
     matchLabels:
-      app: rick-and-morty-app
+      app: rick-and-morty-app  # Label selector for pods
   template:
     metadata:
       labels:
-        app: rick-and-morty-app
+        app: rick-and-morty-app  # Labels to apply to the pods
     spec:
       containers:
-      - name: rick-and-morty-app
-        image: david817/rick-and-morty:1.0
+      - name: rick-and-morty-app  # Name of the container
+        image: david817/rick-and-morty:1.0  # Docker image to use
         ports:
-        - containerPort: 5000
-        env:
-        - name: FLASK_ENV
-          value: production
+        - containerPort: 5000  # Port on which the container listens
+
