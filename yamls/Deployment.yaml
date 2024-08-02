@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: rick-and-morty-app  # Name of the container
-        image: david817/rick-and-morty:1.0  # Docker image to use
+        image: david817/rick-and-morty:2.0  # Docker image to use
         ports:
         - containerPort: 5000  # Port on which the container listens
 

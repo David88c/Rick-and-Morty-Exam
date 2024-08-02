@@ -4,7 +4,7 @@ metadata:
   name: rick-and-morty-service  # Name of the service
 spec:
   selector:
-    app: rick-and-morty-app  # Label selector for pods to target
+    app: rick-and-morty  # Label selector for pods to target
   ports:
     - protocol: TCP
       port: 80  # Port on which the service is exposed

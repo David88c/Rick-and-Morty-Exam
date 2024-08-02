@@ -1,15 +1,13 @@
-FROM python:3.8-slim
+FROM python:3.12-slim
 
 WORKDIR /app
 
 COPY . /app
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir flask
 
 EXPOSE 5000
 
-COPY run_flask.sh /app/run_flask.sh
+ENV FLASK_APP=app.py
 
-RUN chmod +x /app/run_flask.sh
-
-CMD ["./run_flask.sh"]
+CMD ["flask", "run", "--host=0.0.0.0"]

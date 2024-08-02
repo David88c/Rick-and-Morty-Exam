@@ -23,4 +23,8 @@ docker build -t rick-and-morty-app .
 
 ### Run Docker image
 
-docker run -p 5000:5000 --name rick-and-morty-app -d  rick-and-morty-app
+docker run -p 5000:5000 rick-and-morty
+
+### Run Healthcheck
+
+http://localhost:5000/healthcheck
