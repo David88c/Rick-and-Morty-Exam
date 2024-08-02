@@ -13,6 +13,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: Get GitHub Runner IP
+      id: get_ip
+      run: echo "RUNNER_IP=$(curl -s ifconfig.me)" >> $GITHUB_ENV
+
+    - name: Add URL to /etc/hosts
+      run: echo "${{ env.RUNNER_IP }} ingress.rickandmorty.com" | sudo tee -a /etc/hosts
+
     - name: Build the Docker image
       run: docker build . --tag david817/rick-and-morty:${{ github.run_number }}
     - name: Log in to Docker Hub
@@ -54,6 +62,6 @@ jobs:
     - name: Test service URLs
       run: |
         minikube service list
-        minikube service local-devex-svc --url
+        minikube service rick-and-morty-service --url
         echo "------------------opening the service------------------"
-        curl $(minikube service local-devex-svc --url)
+        curl $(minikube service rick-and-morty-service --url)
