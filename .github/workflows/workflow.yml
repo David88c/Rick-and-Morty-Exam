@@ -49,7 +49,7 @@ jobs:
         kubectl apply -f yamls/Ingress.yaml
 
     - name: Wait for Deployment to Finish
-      run: kubectl rollout status deployment/rick-and-morty-app
+      run: kubectl rollout status deployment/rick-and-morty
 
     - name: Check Pods Status
       run: kubectl get pods -o wide
