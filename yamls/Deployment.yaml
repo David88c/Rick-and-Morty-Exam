@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: rick-and-morty-app  # Name of the deployment
+  name: rick-and-morty  # Name of the deployment
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: rick-and-morty-app  # Label selector for pods
+      app: rick-and-morty  # Label selector for pods
   template:
     metadata:
       labels:
-        app: rick-and-morty-app  # Labels to apply to the pods
+        app: rick-and-morty  # Labels to apply to the pods
     spec:
       containers:
-      - name: rick-and-morty-app  # Name of the container
+      - name: rick-and-morty  # Name of the container
         image: david817/rick-and-morty:2.0  # Docker image to use
         ports:
         - containerPort: 5000  # Port on which the container listens
