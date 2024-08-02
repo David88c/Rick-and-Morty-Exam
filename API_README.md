@@ -15,7 +15,7 @@ Fetches all characters stored in `characters.csv`.
 **Response**: Returns a list of dictionaries, where each dictionary contains information about a character.
 
 **Example**:
-```json
+
 [
     {
         "name": "Rick Sanchez",
