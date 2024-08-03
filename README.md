@@ -5,7 +5,8 @@ This project contains a Dockerfile to create a Docker image for a web applicatio
 ### Prerequisites
 
 Before you begin, ensure you have met the following requirements:
-- You have installed Docker on your machine. You can download it from [Docker's official site](https://www.docker.com/products/docker-desktop).
+Python 3.9 or higher
+You have installed Docker on your machine. You can download it from [Docker's official site](https://www.docker.com/products/docker-desktop).
 
 ### Getting Started
 
@@ -24,6 +25,20 @@ docker build -t rick-and-morty-app .
 ### Run Docker image
 
 docker run -p 5000:5000 rick-and-morty
+
+### Fetch data from endpoint
+
+curl http://localhost:5000
+
+### Schema build
+
+[
+  { 
+  “Image”: “”,
+  “location”: “”,
+  “name”: “”
+  }
+]
 
 ### Run Healthcheck
 
